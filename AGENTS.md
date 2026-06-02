@@ -17,6 +17,7 @@ The `memories/` folder tracks project progress and key decisions.
 - At the end of each chapter or modification round, update `MEMORY.md` to reflect the latest state.
 - Only keep the most important content in `MEMORY.md`; use references to chapter files for details.
 - **Line limit:** If `MEMORY.md` exceeds 50 lines after an update, immediately compress it back to ≤50 lines (merge entries, shorten descriptions, remove less critical details to chapter files).
+- **Overflow files:** When compressing, if some content is still important and not outdated but doesn't fit in 50 lines, create a dedicated file under `memories/` (e.g. `memories/decisions.md`) and add a one-line reference in `MEMORY.md`. These files follow the same lazy-read rule — only read when you specifically need that context. When updating `MEMORY.md`, also check whether referenced overflow files have become outdated and clean them up if so.
 
 **What to record:** Only record **project-specific knowledge** that an agent would not know by default. For example:
 - YES: how to run this project (`py -m tinyclaw`), `context_mgr` was used instead of `context`, project-specific naming conventions
