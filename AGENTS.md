@@ -16,6 +16,7 @@ The `memories/` folder tracks project progress and key decisions.
 - Before making any modification to the project, **always read `memories/MEMORY.md` first** to understand current architecture and decisions.
 - At the end of each chapter or modification round, update `MEMORY.md` to reflect the latest state.
 - Only keep the most important content in `MEMORY.md`; use references to chapter files for details.
+- **Line limit:** If `MEMORY.md` exceeds 50 lines after an update, immediately compress it back to ≤50 lines (merge entries, shorten descriptions, remove less critical details to chapter files).
 
 **What to record:** Only record **project-specific knowledge** that an agent would not know by default. For example:
 - YES: how to run this project (`py -m tinyclaw`), `context_mgr` was used instead of `context`, project-specific naming conventions
@@ -31,5 +32,9 @@ Each chapter has a file `memories/chapter_XX.md` that is **created or updated** 
 - Always show the **current latest state** of the chapter — what has been implemented so far, key decisions, and git commits
 - Do NOT record modification history or change logs — only the final accumulated result
 - Each update **overwrites** the previous content with the latest snapshot
+
+**Reading rules:**
+- **Do NOT** read chapter files by default. `MEMORY.md` alone provides enough context for most tasks.
+- Only read a specific `chapter_XX.md` when you need detailed implementation context that `MEMORY.md` does not cover.
 
 The agent can use these files to resume context at any point.
