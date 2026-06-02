@@ -17,7 +17,13 @@ The `memories/` folder tracks project progress and key decisions.
 - At the end of each chapter or modification round, update `MEMORY.md` to reflect the latest state.
 - Only keep the most important content in `MEMORY.md`; use references to chapter files for details.
 
+**What to record:** Only record **project-specific knowledge** that an agent would not know by default. For example:
+- YES: how to run this project (`py -m tinyclaw`), `context_mgr` was used instead of `context`, project-specific naming conventions
+- NO: general language differences (Go vs Python syntax), how `logging` works in Python, what Pydantic is
+
 ### Chapter Files
+
+Chapter boundaries are **determined by the user** — the user will explicitly tell the agent when a chapter ends and when to create the summary. Do NOT auto-create chapter files without the user's instruction.
 
 At the end of each chapter, a new file `memories/chapter_XX.md` is created summarizing:
 - What was implemented in that chapter
@@ -25,32 +31,3 @@ At the end of each chapter, a new file `memories/chapter_XX.md` is created summa
 - Key technical decisions made
 
 The agent can use these files to resume context at any point.
-
-## Run Command
-
-```
-py -m tinyclaw
-```
-
-## Project Structure
-
-```
-tinyclaw/            # Main package
-  main.py            # Entry point (corresponds to cmd/claw/main.go)
-  engine/            # MainLoop core
-  provider/          # LLM provider abstraction (Claude/Zhipu)
-  context_mgr/       # Token monitoring, prompt composition
-  tools/             # Tool registry, built-in tools (bash/edit)
-  memory/            # File-based memory state
-  feishu/            # Feishu bot integration
-```
-
-## Go -> Python Mapping
-
-| Go | Python |
-|---|---|
-| `struct` + json tag | Pydantic `BaseModel` |
-| `interface` | `abc.ABC` |
-| `goroutine` / `channel` | `asyncio` / `Queue` |
-| `os/exec` | `subprocess` |
-| `go run cmd/claw/main.go` | `py -m tinyclaw` |
