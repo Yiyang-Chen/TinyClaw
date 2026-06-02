@@ -5,62 +5,33 @@ from dotenv import load_dotenv
 
 from tinyclaw.engine import AgentEngine
 from tinyclaw.provider.openai_provider import OpenAIProvider
-from tinyclaw.schema import ToolCall, ToolDefinition, ToolResult
-from tinyclaw.tools.base import Registry
+from tinyclaw.tools import ReadFileTool, ToolRegistry
 
 load_dotenv()
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
-log = logging.getLogger(__name__)
 
 
-# ==========================================
-# 伪造的工具注册表 (用于测试 Provider 的工具提取能力)
-# ==========================================
-class MockRegistry(Registry):
-    def get_available_tools(self) -> list[ToolDefinition]:
-        return [
-            ToolDefinition(
-                name="get_weather",
-                description="获取指定城市的当前天气情况。",
-                input_schema={
-                    "type": "object",
-                    "properties": {
-                        "city": {"type": "string"},
-                    },
-                    "required": ["city"],
-                },
-            ),
-        ]
-
-    def execute(self, call: ToolCall) -> ToolResult:
-        log.info("  -> [Mock 工具执行] 获取 %s 的天气中...", call.name)
-        return ToolResult(
-            tool_call_id=call.id,
-            output="API 返回：今天是晴天，气温 25 度。",
-            is_error=False,
-        )
-
-
-# ==========================================
-# 组装运行
-# ==========================================
 def main():
     if not os.environ.get("ZHIPU_API_KEY"):
         raise SystemExit("请先设置 ZHIPU_API_KEY 环境变量")
 
+    # 1. 获取工作区物理边界
     work_dir = os.getcwd()
 
-    # 1. 初始化真实的 Provider 大脑 (指向智谱 GLM-4.5)
-    #    可切换 ClaudeProvider.zhipu(...) 或 OpenAIProvider.zhipu(...)，效果一致
+    # 2. 初始化真实的大脑 (指向智谱 GLM-4.5，使用 OpenAI 适配器)
     pvd = OpenAIProvider.zhipu("glm-4.5-air")
 
-    # 2. 注入伪造的工具注册表
-    reg = MockRegistry()
+    # 3. 初始化真实的 Tool Registry
+    registry = ToolRegistry()
 
-    # 3. 实例化并运行引擎，开启慢思考阶段
-    eng = AgentEngine(pvd, reg, work_dir, enable_thinking=True)
+    # 4. 将真实的 ReadFile 工具挂载到注册表中
+    registry.register(ReadFileTool(work_dir))
 
-    eng.run("我想去北京跑步，帮我查查天气适合吗？")
+    # 5. 实例化核心引擎，任务简单关闭思考阶段以加快速度
+    eng = AgentEngine(pvd, registry, work_dir, enable_thinking=False)
+
+    # 6. 下发一个必须通过真实工具才能完成的任务
+    eng.run("请调用工具读取一下当前工作区目录下 hello.txt 文件的内容，并用一句话向我总结它说了什么。")
 
 
 if __name__ == "__main__":
