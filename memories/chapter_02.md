@@ -53,3 +53,4 @@ Course: "从 0 开始构建 Agent Harness" - 02｜核心心脏：手写 Agent �
 - `e640c27` - add: schema layer
 - `f4664f4` - mod: chapter title + chapter file + AGENTS.md rule
 - `6d33d2b` - add: provider and tools interfaces
+- `b4cbb46` - add: AgentEngine ReAct main loop with mock verification

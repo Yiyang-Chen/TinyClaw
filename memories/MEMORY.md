@@ -9,8 +9,8 @@
 
 ## Current State
 
-- Progress: Chapter 02 in progress (part 1 done: Schema)
-- Latest commit: see chapter index
+- Progress: Chapter 02 completed
+- Latest commit: `b4cbb46`
 
 ## Architecture
 
@@ -33,6 +33,11 @@ tinyclaw/
 - Go `json.RawMessage` / `interface{}` → Python `dict[str, Any]`
 - Go `interface` → Python `ABC` (abstract base class)
 - Go `context.Context` 暂不引入，当前无超时/取消需求，后续按需补充
+- Go `fmt.Errorf` 错误返回 → Python 异常自然传播
+
+## Open Issues
+
+- Tool result 的 role：当前用 `Role.USER` + `tool_call_id` 承载（跟随 Go 课程原版），但 OpenAI API 要求 `role: "tool"`。接入真实 Provider 时需决定是在 Schema 层加 `TOOL` role 还是在 Provider 层做转换。
 
 ## Chapter Index
 
