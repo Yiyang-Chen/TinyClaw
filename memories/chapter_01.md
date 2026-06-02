@@ -27,4 +27,6 @@ Course: "从 0 开始构建 Agent Harness" - 01｜架构演进：从 Framework �
 
 ## Git Commit
 
-Commit marking chapter completion: `b13db90` - add: chapter 01 - project skeleton, memory system, and AGENTS.md
+Commits:
+- `b13db90` - add: chapter 01 - project skeleton, memory system, and AGENTS.md
+- `c79f79b` - mod: refine memory rules - only record project-specific knowledge

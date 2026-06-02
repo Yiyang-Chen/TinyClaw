@@ -9,14 +9,15 @@
 
 ## Current State
 
-- Progress: Chapter 01 completed
-- Latest commit: see `chapter_01.md`
+- Progress: Chapter 02 in progress (part 1 done: Schema)
+- Latest commit: see chapter index
 
 ## Architecture
 
 ```
 tinyclaw/
   main.py           # Entry point
+  schema/           # Unified data types (Message, ToolCall, etc.)
   engine/           # Agent MainLoop
   provider/         # LLM adapters (Claude/Zhipu)
   context_mgr/      # Token monitor, prompt composer
@@ -24,6 +25,12 @@ tinyclaw/
   memory/           # File-based state (PLAN/TODO)
   feishu/           # Feishu integration
 ```
+
+## Key Decisions
+
+- Schema uses Pydantic `BaseModel` (Go struct + JSON tag equivalent)
+- `Role` uses `StrEnum` (type-safe + serializes as plain string)
+- Go `json.RawMessage` / `interface{}` → Python `dict[str, Any]`
 
 ## Chapter Index
 
