@@ -31,6 +31,8 @@ tinyclaw/
 - Schema uses Pydantic `BaseModel` (Go struct + JSON tag equivalent)
 - `Role` uses `StrEnum` (type-safe + serializes as plain string)
 - Go `json.RawMessage` / `interface{}` → Python `dict[str, Any]`
+- Go `interface` → Python `ABC` (abstract base class)
+- Go `context.Context` 暂不引入，当前无超时/取消需求，后续按需补充
 
 ## Chapter Index
 
