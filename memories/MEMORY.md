@@ -9,7 +9,7 @@
 
 ## Current State
 
-- Progress: Chapter 03 in progress | Latest commit: `b4cbb46`
+- Progress: Chapter 03 completed
 
 ## Architecture
 
@@ -23,6 +23,7 @@ tinyclaw/
 - Pydantic `BaseModel` for schema, `Role` as `StrEnum`
 - Go `interface` → ABC, Go `json.RawMessage` → `dict[str, Any]`
 - No `context.Context` (no timeout/cancel need yet), exceptions instead of error returns
+- `enable_thinking`: 两阶段循环开关，`available_tools=None` 表示 Thinking 阶段（`[]` 不等价）
 
 ## Open Issues
 
