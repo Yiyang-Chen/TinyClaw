@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 from tinyclaw.engine import AgentEngine
 from tinyclaw.provider.openai_provider import OpenAIProvider
-from tinyclaw.tools import BashTool, ReadFileTool, ToolRegistry, WriteFileTool
+from tinyclaw.tools import BashTool, EditFileTool, ReadFileTool, ToolRegistry, WriteFileTool
 
 load_dotenv()
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -28,16 +28,19 @@ def main():
     registry.register(ReadFileTool(work_dir))
     registry.register(WriteFileTool(work_dir))
     registry.register(BashTool(work_dir))
+    registry.register(EditFileTool(work_dir))
 
     # 5. 实例化核心引擎
     eng = AgentEngine(pvd, registry, work_dir, enable_thinking=False)
 
-    # 6. 发起一个需要连贯物理动作的任务
+    # 6. 发起一个需要局部修改的指令
     eng.run(
-        "请帮我执行以下操作：\n"
-        "1. 用 bash 查看一下我当前电脑的 Python 版本。\n"
-        "2. 帮我写一个简单的 hello_claw.py 文件，输出 \"Hello, TinyClaw!\"。\n"
-        "3. 用 bash 运行这个 py 文件，确认它能正常工作。"
+        "我当前目录下有一个 server.go 文件。\n"
+        '请帮我把里面 "TODO: 增加鉴权逻辑" 下面的那个 if 语句，整个替换为：\n'
+        "    if user == nil {\n"
+        '        fmt.Println("Forbidden!")\n'
+        "        return\n"
+        "    }"
     )
 
 

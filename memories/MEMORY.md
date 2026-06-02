@@ -9,7 +9,7 @@
 
 ## Current State
 
-- Progress: Chapter 06 completed
+- Progress: Chapter 07 completed
 
 ## Architecture
 
@@ -18,7 +18,7 @@ tinyclaw/
   main.py, schema/, engine/, provider/, tools/
   provider/: base.py (ABC), openai_provider.py, claude_provider.py
   tools/: base.py (BaseTool ABC + Registry ABC + ToolRegistry impl)
-          read_file.py, write_file.py, bash.py
+          read_file.py, write_file.py, bash.py, edit_file.py
 ```
 
 ## Key Decisions
@@ -30,10 +30,11 @@ tinyclaw/
 - Provider: `__init__(model, api_key, base_url)` + `@classmethod zhipu()` 工厂方法
 - Tool 层：`BaseTool` ABC → `ToolRegistry` dict O(1) 路由，所有工具注入 `work_dir`
 - 截断保护：read_file/bash MAX_LEN=8000；bash TIMEOUT=30s
+- edit_file：四级容错降级（L1 精确→L2 \r\n 归一→L3 trim→L4 逐行去缩进滑窗）
 
 ## Open Issues
 
-- 详见 `memories/open_issues.md`（10 条，含路径穿越、bash 超时残留等）
+- 详见 `memories/open_issues.md`（13 条，含路径穿越、edit_file 原版设计问题等）
 
 ## Chapter Index
 
@@ -45,3 +46,4 @@ tinyclaw/
 | 04 | chapter_04.md | 代码实战：实现双协议 Provider 适配器 |
 | 05 | chapter_05.md | 工具与执行层：BaseTool + ToolRegistry + read_file |
 | 06 | chapter_06.md | write_file + bash 工具实现 |
+| 07 | chapter_07.md | edit_file 四级容错局部替换工具 |
