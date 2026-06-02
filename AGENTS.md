@@ -23,11 +23,15 @@ The `memories/` folder tracks project progress and key decisions.
 
 ### Chapter Files
 
-Chapter boundaries are **determined by the user** — the user will explicitly tell the agent when a chapter ends and when to create the summary. Do NOT auto-create chapter files without the user's instruction.
+Each chapter has a file `memories/chapter_XX.md` that is **created or updated** when:
+1. The user says "记录一下" or similar
+2. The chapter ends
 
-At the end of each chapter, a new file `memories/chapter_XX.md` is created summarizing:
-- What was implemented in that chapter
-- Which git commit marks the chapter's completion
-- Key technical decisions made
+**Content rules:**
+- Always show the **current latest state** of the chapter — what has been implemented so far, key decisions, and git commits
+- Do NOT record modification history or change logs — only the final accumulated result
+- Each update **overwrites** the previous content with the latest snapshot
+
+Do NOT auto-create or auto-update chapter files without the user's instruction.
 
 The agent can use these files to resume context at any point.

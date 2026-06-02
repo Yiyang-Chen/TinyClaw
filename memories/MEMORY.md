@@ -37,6 +37,7 @@ tinyclaw/
 | Chapter | File | Topic |
 |---|---|---|
 | 01 | chapter_01.md | Architecture blueprint + project skeleton |
+| 02 | chapter_02.md | 核心心脏：手写 Agent 的 Main Loop |
 
 ## Repo
 
