@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 from tinyclaw.engine import AgentEngine
 from tinyclaw.provider.openai_provider import OpenAIProvider
-from tinyclaw.tools import ReadFileTool, ToolRegistry
+from tinyclaw.tools import BashTool, ReadFileTool, ToolRegistry, WriteFileTool
 
 load_dotenv()
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -24,14 +24,21 @@ def main():
     # 3. 初始化真实的 Tool Registry
     registry = ToolRegistry()
 
-    # 4. 将真实的 ReadFile 工具挂载到注册表中
+    # 4. 将工具挂载到注册表中
     registry.register(ReadFileTool(work_dir))
+    registry.register(WriteFileTool(work_dir))
+    registry.register(BashTool(work_dir))
 
-    # 5. 实例化核心引擎，任务简单关闭思考阶段以加快速度
+    # 5. 实例化核心引擎
     eng = AgentEngine(pvd, registry, work_dir, enable_thinking=False)
 
-    # 6. 下发一个必须通过真实工具才能完成的任务
-    eng.run("请调用工具读取一下当前工作区目录下 hello.txt 文件的内容，并用一句话向我总结它说了什么。")
+    # 6. 发起一个需要连贯物理动作的任务
+    eng.run(
+        "请帮我执行以下操作：\n"
+        "1. 用 bash 查看一下我当前电脑的 Python 版本。\n"
+        "2. 帮我写一个简单的 hello_claw.py 文件，输出 \"Hello, TinyClaw!\"。\n"
+        "3. 用 bash 运行这个 py 文件，确认它能正常工作。"
+    )
 
 
 if __name__ == "__main__":
