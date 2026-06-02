@@ -1,29 +1,72 @@
 import logging
+import os
+
+from tinyclaw.engine import AgentEngine
+from tinyclaw.provider.base import LLMProvider
+from tinyclaw.schema import Message, Role, ToolCall, ToolDefinition, ToolResult
+from tinyclaw.tools.base import Registry
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 log = logging.getLogger(__name__)
 
 
+# ==========================================
+# 1. 伪造的大模型 Provider
+# ==========================================
+class MockProvider(LLMProvider):
+    def __init__(self):
+        self._turn = 0
+
+    def generate(
+        self, messages: list[Message], available_tools: list[ToolDefinition]
+    ) -> Message:
+        self._turn += 1
+        if self._turn == 1:
+            return Message(
+                role=Role.ASSISTANT,
+                content="让我来看看当前目录下有什么文件。",
+                tool_calls=[
+                    ToolCall(
+                        id="call_123",
+                        name="bash",
+                        arguments={"command": "ls -la"},
+                    )
+                ],
+            )
+
+        return Message(
+            role=Role.ASSISTANT,
+            content="我看到了文件列表，里面包含 main.py，任务完成！",
+        )
+
+
+# ==========================================
+# 2. 伪造的 Tool Registry
+# ==========================================
+class MockRegistry(Registry):
+    def get_available_tools(self) -> list[ToolDefinition]:
+        return []
+
+    def execute(self, call: ToolCall) -> ToolResult:
+        return ToolResult(
+            tool_call_id=call.id,
+            output="-rw-r--r--  1 user group  234 Oct 24 10:00 main.py\n",
+            is_error=False,
+        )
+
+
+# ==========================================
+# 3. 组装运行
+# ==========================================
 def main():
-    log.info("Welcome to TinyClaw Engine startup sequence")
+    work_dir = os.getcwd()
 
-    # TODO: 1. 初始化模型 Provider (大脑)
-    # pvd = ClaudeProvider(...)
+    pvd = MockProvider()
+    reg = MockRegistry()
 
-    # TODO: 2. 初始化 Tool Registry (手脚)
-    # registry = ToolRegistry()
-    # registry.register(BashTool())
+    eng = AgentEngine(pvd, reg, work_dir)
 
-    # TODO: 3. 初始化上下文管理器 (内存管理器)
-    # ctx_manager = ContextManager(...)
-
-    # TODO: 4. 组装并启动核心 Engine (操作系统心脏)
-    # engine = AgentEngine(pvd, registry, ctx_manager)
-
-    # log.info("开始执行任务...")
-    # engine.run("帮我检查一下当前目录下的文件并输出一个 README.md 大纲")
-
-    log.info("架构蓝图搭建完毕，等待各核心模块注入！")
+    eng.run("帮我检查当前目录的文件")
 
 
 if __name__ == "__main__":
