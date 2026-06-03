@@ -30,17 +30,14 @@ def main():
     registry.register(BashTool(work_dir))
     registry.register(EditFileTool(work_dir))
 
-    # 5. 实例化核心引擎
-    eng = AgentEngine(pvd, registry, work_dir, enable_thinking=False)
+    # 5. 实例化核心引擎，开启慢思考促使模型一次性统筹规划
+    eng = AgentEngine(pvd, registry, work_dir, enable_thinking=True)
 
-    # 6. 发起一个需要局部修改的指令
+    # 6. 下发一个需要收集多源信息的任务
     eng.run(
-        "我当前目录下有一个 server.go 文件。\n"
-        '请帮我把里面 "TODO: 增加鉴权逻辑" 下面的那个 if 语句，整个替换为：\n'
-        "    if user == nil {\n"
-        '        fmt.Println("Forbidden!")\n'
-        "        return\n"
-        "    }"
+        "我当前目录下有 a.txt, b.txt, c.txt 三个文件。\n"
+        "为了节省时间，请你同时一次性读取这三个文件，"
+        "并将它们的内容综合起来，告诉我它们分别记录了什么领域的信息。"
     )
 
 

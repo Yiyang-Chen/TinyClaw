@@ -1,7 +1,8 @@
 import logging
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from tinyclaw.provider.base import LLMProvider
-from tinyclaw.schema import Message, Role
+from tinyclaw.schema import Message, Role, ToolCall, ToolResult
 from tinyclaw.tools.base import Registry
 
 log = logging.getLogger(__name__)
@@ -21,6 +22,16 @@ class AgentEngine:
         self.registry = registry
         self.work_dir = work_dir
         self.enable_thinking = enable_thinking
+
+    def _execute_single(self, index: int, tool_call: ToolCall) -> tuple[int, ToolResult]:
+        """在线程池中执行单个工具调用，返回 (索引, 结果) 以便按序回填。"""
+        log.info("  -> [Thread] 执行工具: %s, 参数: %s", tool_call.name, tool_call.arguments)
+        result = self.registry.execute(tool_call)
+        if result.is_error:
+            log.error("  -> [Thread] 工具执行报错: %s", result.output)
+        else:
+            log.info("  -> [Thread] 工具执行成功 (返回 %d 字节)", len(result.output))
+        return index, result
 
     def run(self, user_prompt: str) -> None:
         log.info("[Engine] 引擎启动，锁定工作区: %s", self.work_dir)
@@ -73,27 +84,38 @@ class AgentEngine:
                 log.info("[Engine] 模型未请求调用工具，任务宣告完成。")
                 break
 
-            log.info(
-                "[Engine] 模型请求调用 %d 个工具...", len(action_resp.tool_calls)
-            )
+            n = len(action_resp.tool_calls)
+            log.info("[Engine] 模型请求并发调用 %d 个工具...", n)
 
-            for tool_call in action_resp.tool_calls:
-                log.info(
-                    "  -> 执行工具: %s, 参数: %s", tool_call.name, tool_call.arguments
-                )
+            # 预分配固定长度切片，线程返回 (索引, 结果)，主线程按索引回填
+            results: list[ToolResult | None] = [None] * n
 
-                result = self.registry.execute(tool_call)
+            with ThreadPoolExecutor(max_workers=n) as pool:
+                fut_to_ctx: dict[object, tuple[int, ToolCall]] = {}
+                for i, tc in enumerate(action_resp.tool_calls):
+                    f = pool.submit(self._execute_single, i, tc)
+                    fut_to_ctx[f] = (i, tc)
 
-                if result.is_error:
-                    log.error("  -> 工具执行报错: %s", result.output)
-                else:
-                    log.info(
-                        "  -> 工具执行成功 (返回 %d 字节)", len(result.output)
+                for fut in as_completed(fut_to_ctx):
+                    try:
+                        idx, res = fut.result()
+                    except Exception:
+                        idx, tc = fut_to_ctx[fut]
+                        log.exception("工具 %s 线程发生未预期异常", tc.name)
+                        res = ToolResult(
+                            tool_call_id=tc.id,
+                            output=f"Internal error executing {tc.name}",
+                            is_error=True,
+                        )
+                    results[idx] = res
+
+            for i, result in enumerate(results):
+                if result is None:
+                    raise RuntimeError(f"Tool call {i} 未返回结果（内部错误）")
+                context_history.append(
+                    Message(
+                        role=Role.USER,
+                        content=result.output,
+                        tool_call_id=action_resp.tool_calls[i].id,
                     )
-
-                observation_msg = Message(
-                    role=Role.USER,
-                    content=result.output,
-                    tool_call_id=tool_call.id,
                 )
-                context_history.append(observation_msg)
